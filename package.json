@@ -9,12 +9,14 @@
     "dev:file": "nodemon --watch src --ext ts --exec \"npm run build:dev && echo 'Script updated - refresh CardMarket page'\"",
     "build": "rollup -c build/rollup.config.prod.js",
     "build:dev": "rollup -c build/rollup.config.dev.js",
+    "build:pages": "npm run build && npm run prepare:pages",
+    "prepare:pages": "mkdir -p docs && cp dist/mkm-helper.user.js docs/ && cp README.md docs/",
     "type-check": "tsc --noEmit",
     "lint": "eslint src/**/*.ts",
-    "clean": "rm -rf dist dev-server",
+    "clean": "rm -rf dist dev-server docs",
     "sync-sets": "npx tsx scripts/sync-scryfall-sets.ts",
     "install:dev": "echo 'Install the development userscript from tampermonkey/mkm-helper-dev.user.js'",
-    "install:prod": "echo 'Install the production userscript from dist/mkm-helper.user.js'"
+    "install:prod": "echo 'Install the production userscript from https://username.github.io/tampermonkey-scripts/mkmscript/mkm-helper.user.js'"
   },
   "keywords": [
     "tampermonkey",

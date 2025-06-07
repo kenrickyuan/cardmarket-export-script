@@ -2,13 +2,21 @@
 
 A TypeScript userscript for CardMarket Magic: The Gathering that adds useful UI modifications and export functionality.
 
-## Features
+## 🚀 Quick Install
 
-- Hide/show restricted cards on product pages
-- Export orders to Moxfield CSV format
-- Search icons for quick order history checks
-- Enhanced navigation for search results
-- Wants list management with clipboard export
+1. **Install a userscript manager** like Tampermonkey or similar browser extension
+
+2. **Install MKM Helper**: [📦 Click to Install](https://kenrick-yuan.github.io/tampermonkey-scripts/mkmscript/mkm-helper.user.js)
+
+3. **Visit CardMarket** and enjoy enhanced functionality!
+
+> 💡 **Alternative**: Copy this URL into your userscript manager manually:  
+> `https://kenrick-yuan.github.io/tampermonkey-scripts/mkmscript/mkm-helper.user.js`
+
+## ✨ Features
+
+- **Export orders to Moxfield CSV** with 970+ MTG set mappings
+- **CSV error analysis** for when Moxfield import doesn't work properly
 
 ## Development Setup
 
