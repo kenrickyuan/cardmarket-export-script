@@ -1,0 +1,16 @@
+// ==UserScript==
+// @name         MKM Helper
+// @namespace    https://github.com/your-username/mkm-helper
+// @version      1.0.0
+// @description  Various useful UI modifications for CardMarket Magic: The Gathering
+// @author       Your Name
+// @match        https://www.cardmarket.com/*/Magic/Products/*/*
+// @match        https://www.cardmarket.com/*/Magic/Cards/*
+// @match        https://www.cardmarket.com/*/Magic/Wants/*
+// @match        https://www.cardmarket.com/*/Magic/Orders/*
+// @match        https://www.cardmarket.com/*/Magic/ShoppingCart
+// @match        https://www.cardmarket.com/*/Magic/Users/*/Offers/Singles*
+// @match        https://www.cardmarket.com/*/Magic/Orders/Search/Results*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=cardmarket.com
+// @grant        none
+// ==/UserScript==
