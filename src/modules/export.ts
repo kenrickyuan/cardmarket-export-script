@@ -9,6 +9,9 @@ import {
   CARDMARKET_SELECTORS,
 } from "../constants";
 import { SET_NAME_TO_CODE_MAPPING } from "../data/set-mappings";
+import { getEdgeCaseMapping } from "../data/edge-cases";
+import { UnknownSetsTracker } from "../data/unknown-sets";
+import { CSVErrorAnalyzer } from "../utils/csv-error-analyzer";
 import type {
   MoxfieldExportData,
   CardMarketPageType,
@@ -79,20 +82,44 @@ const extractArticleData = (row: Element): MoxfieldExportData | null => {
 const getSetCode = (expansionName: string): string => {
   if (!expansionName) return "";
 
-  // First, try exact match
+  // First, check edge case mappings
+  const edgeCase = getEdgeCaseMapping(expansionName);
+  if (edgeCase) {
+    return edgeCase;
+  }
+
+  // Second, try exact match in main mappings
   if (SET_NAME_TO_CODE_MAPPING[expansionName]) {
     return SET_NAME_TO_CODE_MAPPING[expansionName];
   }
 
-  // Try partial matches for sets with different naming conventions
+  // Third, handle CardMarket's "Commander: " naming convention
+  // CardMarket: "Commander: Dragonstorm" -> Scryfall: "Tarkir: Dragonstorm Commander"
+  if (expansionName.startsWith("Commander: ")) {
+    const setBaseName = expansionName.replace("Commander: ", "");
+    
+    // Look for matching pattern in Scryfall data
+    for (const [setName, setCode] of Object.entries(SET_NAME_TO_CODE_MAPPING)) {
+      // Match patterns like "Tarkir: Dragonstorm Commander" or "Aetherdrift Commander"
+      if (setName.endsWith(" Commander") && 
+          (setName.includes(setBaseName) || setBaseName.includes(setName.replace(" Commander", "")))) {
+        return setCode;
+      }
+    }
+  }
+
+  // Fourth, try partial matches for sets with different naming conventions
   for (const [setName, setCode] of Object.entries(SET_NAME_TO_CODE_MAPPING)) {
     if (expansionName.includes(setName) || setName.includes(expansionName)) {
       return setCode;
     }
   }
 
-  // If no match found, return lowercase version of original name
-  return expansionName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  // If no match found, create fallback and track as unknown
+  const fallbackCode = expansionName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  UnknownSetsTracker.addUnknownSet(expansionName, fallbackCode);
+  
+  return fallbackCode;
 };
 
 // Generate CSV content from article data
@@ -245,6 +272,167 @@ const exportToText = (): void => {
   }
 };
 
+// Show CSV error analysis dialog
+const showCSVErrorDialog = (): void => {
+  // Create modal dialog
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  const dialog = document.createElement('div');
+  dialog.style.cssText = `
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  `;
+
+  dialog.innerHTML = `
+    <h3>CSV Error Analyzer</h3>
+    <p>Paste the Moxfield error message and upload your original CSV to extract problematic rows.</p>
+    
+    <div style="margin: 15px 0;">
+      <label for="errorText" style="display: block; margin-bottom: 5px; font-weight: bold;">
+        Moxfield Error Message:
+      </label>
+      <textarea 
+        id="errorText" 
+        rows="6" 
+        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+        placeholder="Paste the error message from Moxfield here..."
+      ></textarea>
+    </div>
+
+    <div style="margin: 15px 0;">
+      <label for="csvFile" style="display: block; margin-bottom: 5px; font-weight: bold;">
+        Original CSV File:
+      </label>
+      <input 
+        type="file" 
+        id="csvFile" 
+        accept=".csv"
+        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+      />
+    </div>
+
+    <div style="margin: 15px 0; text-align: right;">
+      <button id="analyzeBtn" style="margin-right: 10px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Analyze Errors
+      </button>
+      <button id="closeBtn" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Close
+      </button>
+    </div>
+
+    <div id="results" style="margin-top: 20px;"></div>
+  `;
+
+  modal.appendChild(dialog);
+  document.body.appendChild(modal);
+
+  // Close dialog
+  const closeDialog = () => {
+    document.body.removeChild(modal);
+  };
+
+  // Event listeners
+  dialog.querySelector('#closeBtn')?.addEventListener('click', closeDialog);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeDialog();
+  });
+
+  dialog.querySelector('#analyzeBtn')?.addEventListener('click', () => {
+    const errorText = (dialog.querySelector('#errorText') as HTMLTextAreaElement)?.value;
+    const fileInput = dialog.querySelector('#csvFile') as HTMLInputElement;
+    const resultsDiv = dialog.querySelector('#results') as HTMLDivElement;
+
+    if (!errorText.trim()) {
+      resultsDiv.innerHTML = '<p style="color: red;">Please enter the error message.</p>';
+      return;
+    }
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+      resultsDiv.innerHTML = '<p style="color: red;">Please select a CSV file.</p>';
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const csvContent = e.target?.result as string;
+        
+        // Parse errors and analyze CSV
+        const errors = CSVErrorAnalyzer.parseErrorMessage(errorText);
+        const result = CSVErrorAnalyzer.extractErrorRows(csvContent, errors);
+        const suggestions = CSVErrorAnalyzer.suggestCorrections(errors);
+
+        // Display results
+        let html = `
+          <div style="border-top: 1px solid #ccc; padding-top: 15px;">
+            <h4>Analysis Results</h4>
+            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-size: 12px;">${result.summary}</pre>
+            
+            <h5>Suggested Corrections:</h5>
+            <div style="background: #e7f3ff; padding: 10px; border-radius: 4px; margin: 10px 0;">
+        `;
+
+        if (Object.keys(suggestions).length > 0) {
+          Object.entries(suggestions).forEach(([wrong, correct]) => {
+            html += `<p style="margin: 5px 0;"><strong>${wrong}</strong> → <strong>${correct}</strong></p>`;
+          });
+        } else {
+          html += '<p>No automatic suggestions available.</p>';
+        }
+
+        html += `
+            </div>
+            
+            <button id="downloadErrorsBtn" style="margin-right: 10px; padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Download Error Rows CSV
+            </button>
+            <button id="downloadCorrectedBtn" style="padding: 8px 16px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">
+              Download Corrected CSV
+            </button>
+          </div>
+        `;
+
+        resultsDiv.innerHTML = html;
+
+        // Download buttons
+        resultsDiv.querySelector('#downloadErrorsBtn')?.addEventListener('click', () => {
+          const errorCsv = result.errorRows.join('\n');
+          downloadCSV(errorCsv, 'moxfield-errors');
+        });
+
+        resultsDiv.querySelector('#downloadCorrectedBtn')?.addEventListener('click', () => {
+          const correctedCsv = CSVErrorAnalyzer.createCorrectedCSV(result, suggestions);
+          downloadCSV(correctedCsv, 'moxfield-corrected');
+        });
+
+      } catch (error) {
+        resultsDiv.innerHTML = `<p style="color: red;">Error analyzing CSV: ${(error as Error).message}</p>`;
+      }
+    };
+
+    reader.readAsText(file);
+  });
+};
+
 // Create MKMHelper section matching CardMarket's style
 const createMKMHelperSection = (): HTMLElement => {
   // Create the wrapper div
@@ -357,7 +545,40 @@ const createExportButtons = (): void => {
   moxfieldContainer.appendChild(moxfieldButton);
   kenricksToolsContent.appendChild(moxfieldContainer);
 
-  devLog("Kenrick's Tools section created with export buttons");
+  // Add unknown sets management buttons
+  const unknownSetsButton = document.createElement("input");
+  unknownSetsButton.type = "submit";
+  unknownSetsButton.id = "showUnknownSets";
+  unknownSetsButton.value = "Show Unknown Sets";
+  unknownSetsButton.title = "View list of unknown sets encountered";
+  unknownSetsButton.className = "btn my-2 btn-sm btn-outline-info";
+  unknownSetsButton.addEventListener("click", () => {
+    const report = UnknownSetsTracker.exportUnknownSets();
+    console.log("📋 Unknown Sets Report:");
+    console.log(report);
+    alert(`Unknown Sets Report logged to console.\n\nTotal unknown sets: ${UnknownSetsTracker.getUnknownSets().length}`);
+  });
+
+  const unknownSetsContainer = document.createElement("div");
+  unknownSetsContainer.className = "d-grid";
+  unknownSetsContainer.appendChild(unknownSetsButton);
+  kenricksToolsContent.appendChild(unknownSetsContainer);
+
+  // Add CSV error analyzer button
+  const csvErrorButton = document.createElement("input");
+  csvErrorButton.type = "submit";
+  csvErrorButton.id = "analyzeCsvErrors";
+  csvErrorButton.value = "Analyze CSV Errors";
+  csvErrorButton.title = "Parse Moxfield errors and extract problematic rows";
+  csvErrorButton.className = "btn my-2 btn-sm btn-outline-warning";
+  csvErrorButton.addEventListener("click", showCSVErrorDialog);
+
+  const csvErrorContainer = document.createElement("div");
+  csvErrorContainer.className = "d-grid";
+  csvErrorContainer.appendChild(csvErrorButton);
+  kenricksToolsContent.appendChild(csvErrorContainer);
+
+  devLog("Kenrick's Tools section created with export, set management, and CSV error analysis buttons");
 };
 
 // Initialize export functionality
