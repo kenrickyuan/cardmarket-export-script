@@ -3,6 +3,7 @@
 
 import { devLog, devError, devTiming } from './dev/helpers';
 import { CARDMARKET_SELECTORS, CARDMARKET_CSS_CLASSES } from './constants';
+import { initializeExport } from './modules/export';
 import type { CardMarketPageType } from './types/cardmarket';
 
 // Initialize timing for development
@@ -45,7 +46,7 @@ const initializeMKMHelper = (): void => {
     
     if (pageType.isOrdersPage) {
       devLog('Initializing orders page features');
-      // TODO: Initialize export functionality
+      initializeExport(pageType);
     }
     
     if (pageType.isSearchResultsPage) {
