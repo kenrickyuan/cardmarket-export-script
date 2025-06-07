@@ -370,6 +370,11 @@ const showCSVErrorDialog = (): void => {
     }
 
     const file = fileInput.files[0];
+    if (!file) {
+      resultsDiv.innerHTML = '<p style="color: red;">Please select a CSV file.</p>';
+      return;
+    }
+    
     const reader = new FileReader();
 
     reader.onload = (e) => {

@@ -25,12 +25,14 @@ export class CSVErrorAnalyzer {
     
     let match;
     while ((match = errorRegex.exec(errorText)) !== null) {
-      errors.push({
-        cardName: match[1],
-        edition: match[2],
-        lineNumber: parseInt(match[3]),
-        originalLine: ""
-      });
+      if (match[1] && match[2] && match[3]) {
+        errors.push({
+          cardName: match[1],
+          edition: match[2],
+          lineNumber: parseInt(match[3]),
+          originalLine: ""
+        });
+      }
     }
     
     return errors;
@@ -54,12 +56,14 @@ export class CSVErrorAnalyzer {
       
       if (lineIndex < csvLines.length && lineIndex > 0) { // Skip header (index 0)
         const csvLine = csvLines[lineIndex];
-        errorRows.push(csvLine);
-        
-        enhancedErrors.push({
-          ...error,
-          originalLine: csvLine
-        });
+        if (csvLine) {
+          errorRows.push(csvLine);
+          
+          enhancedErrors.push({
+            ...error,
+            originalLine: csvLine
+          });
+        }
       }
     }
 
@@ -139,8 +143,8 @@ export class CSVErrorAnalyzer {
     };
 
     for (const error of errors) {
-      if (commonFixes[error.edition]) {
-        suggestions[error.edition] = commonFixes[error.edition];
+      if (error.edition && commonFixes[error.edition]) {
+        suggestions[error.edition] = commonFixes[error.edition]!;
       }
     }
 
