@@ -1,4 +1,4 @@
-# MKM Helper
+# Kenrick's Tools
 
 A TypeScript userscript for CardMarket Magic: The Gathering that adds useful UI modifications and export functionality.
 
@@ -6,12 +6,12 @@ A TypeScript userscript for CardMarket Magic: The Gathering that adds useful UI 
 
 1. **Install a userscript manager** like Tampermonkey or similar browser extension
 
-2. **Install MKM Helper**: [📦 Click to Install](https://kenrick-yuan.github.io/tampermonkey-scripts/mkmscript/mkm-helper.user.js)
+2. **Install Kenrick's Tools**: [📦 Click to Install](https://kenrickyuan.github.io/cardmarket-export-script/mkm-helper.user.js)
 
 3. **Visit CardMarket** and enjoy enhanced functionality!
 
 > 💡 **Alternative**: Copy this URL into your userscript manager manually:  
-> `https://kenrick-yuan.github.io/tampermonkey-scripts/mkmscript/mkm-helper.user.js`
+> `https://kenrickyuan.github.io/cardmarket-export-script/mkm-helper.user.js`
 
 ## ✨ Features
 
@@ -50,7 +50,7 @@ A TypeScript userscript for CardMarket Magic: The Gathering that adds useful UI 
 4. **Test on CardMarket**
    - Navigate to any Magic page on cardmarket.com
    - Open browser console (F12)
-   - Look for initialization messages starting with `🔧 MKM Helper DEV:`
+   - Look for initialization messages starting with `🔧 Kenrick's Tools DEV:`
 
 ### Development Workflow
 

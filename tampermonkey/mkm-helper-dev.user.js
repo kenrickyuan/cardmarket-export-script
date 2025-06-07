@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         MKM Helper (DEV)
-// @namespace    https://github.com/your-username/mkm-helper
+// @name         Kenrick's Tools (DEV)
+// @namespace    https://kenrickyuan.github.io/cardmarket-export-script/
 // @version      0.0.1-dev
 // @description  Development version - loads from localhost
-// @author       Your Name
+// @author       kenrick
 // @match        https://www.cardmarket.com/*/Magic/Products/*/*
 // @match        https://www.cardmarket.com/*/Magic/Cards/*
 // @match        https://www.cardmarket.com/*/Magic/Wants/*
@@ -17,4 +17,4 @@
 // ==/UserScript==
 
 // Development script - all code loaded from @require directive above
-console.log('🚀 MKM Helper DEV loader initialized');
+console.log('🚀 Kenrick\'s Tools DEV loader initialized');

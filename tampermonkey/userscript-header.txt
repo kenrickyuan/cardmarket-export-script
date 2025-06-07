@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         MKM Helper
-// @namespace    https://github.com/your-username/mkm-helper
+// @name         Kenrick's Tools
+// @namespace    https://kenrickyuan.github.io/cardmarket-export-script/
+// @updateURL    https://kenrickyuan.github.io/cardmarket-export-script/mkm-helper.user.js
+// @downloadURL  https://kenrickyuan.github.io/cardmarket-export-script/mkm-helper.user.js
 // @version      1.0.0
 // @description  Various useful UI modifications for CardMarket Magic: The Gathering
-// @author       Your Name
+// @author       kenrick
 // @match        https://www.cardmarket.com/*/Magic/Products/*/*
 // @match        https://www.cardmarket.com/*/Magic/Cards/*
 // @match        https://www.cardmarket.com/*/Magic/Wants/*
