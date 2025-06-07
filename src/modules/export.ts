@@ -31,7 +31,8 @@ const extractArticleData = (row: Element): MoxfieldExportData | null => {
     const cardName = cleanName.replace("Æ", "Ae").replace("æ", "ae");
 
     // Get set code from expansion name
-    const expansionName = dataset["expansion-name"] || "";
+    const expansionName =
+      dataset["expansion-name"] || dataset.expansionName || "";
     const setCode = getSetCode(expansionName);
 
     // Map condition and language
@@ -91,7 +92,6 @@ const getSetCode = (expansionName: string): string => {
   }
 
   // If no match found, return lowercase version of original name
-  devLog(`No set code mapping found for: ${expansionName}`);
   return expansionName.toLowerCase().replace(/[^a-z0-9]/g, "");
 };
 
@@ -245,28 +245,83 @@ const exportToText = (): void => {
   }
 };
 
-// Create export buttons and add to page
-const createExportButtons = (): void => {
-  const collapsibleExport = document.querySelector(
-    CARDMARKET_SELECTORS.collapsibleExport
+// Create MKMHelper section matching CardMarket's style
+const createMKMHelperSection = (): HTMLElement => {
+  // Create the wrapper div
+  const wrapperDiv = document.createElement("div");
+  wrapperDiv.className = "align-items-center";
+
+  // Create the custom-collapse-wrapper
+  const collapseWrapper = document.createElement("div");
+  collapseWrapper.className = "custom-collapse-wrapper w-100";
+
+  // Create the label/header button
+  const labelDiv = document.createElement("div");
+  labelDiv.className = "label custom-collapse-label";
+  labelDiv.id = "labelKenricksTools";
+  labelDiv.setAttribute(
+    "data-open-label",
+    '<span><span class="fonticon-code fonticon-color-primary me-2"></span><span>Kenrick\'s Tools</span></span><span class="fonticon-chevron-down small ms-1"></span>'
   );
-  const collapsibleMemo = document.querySelector(
-    CARDMARKET_SELECTORS.collapsibleMemo
+  labelDiv.setAttribute(
+    "data-close-label",
+    '<span><span class="fonticon-code fonticon-color-primary me-2"></span><span>Kenrick\'s Tools</span></span><span class="fonticon-chevron-up small ms-1"></span>'
   );
 
-  if (!collapsibleExport) {
-    devLog("Export container not found");
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "d-grid";
+
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.className =
+    "d-flex align-items-center px-0 btn btn-sm btn-link btn-slim";
+  toggleButton.setAttribute("aria-expanded", "false");
+  toggleButton.setAttribute("aria-controls", "collapsibleKenricksTools");
+  toggleButton.setAttribute("data-bs-toggle", "collapse");
+  toggleButton.setAttribute("data-bs-target", "#collapsibleKenricksTools");
+  toggleButton.innerHTML =
+    '<span><span class="fonticon-code fonticon-color-primary me-2"></span><span>Kenrick\'s Tools</span></span><span class="fonticon-chevron-down small ms-1"></span>';
+
+  buttonContainer.appendChild(toggleButton);
+  labelDiv.appendChild(buttonContainer);
+
+  // Create the collapsible content
+  const collapseDiv = document.createElement("div");
+  collapseDiv.id = "collapsibleKenricksTools";
+  collapseDiv.className = "collapse custom-collapse";
+  collapseDiv.setAttribute("data-collapse-label", "#labelKenricksTools");
+
+  const description = document.createElement("p");
+  description.className = "fst-italic small";
+  description.textContent =
+    "Enhanced CardMarket functionality provided by Kenrick's Tools.";
+
+  collapseDiv.appendChild(description);
+  collapseWrapper.appendChild(labelDiv);
+  collapseWrapper.appendChild(collapseDiv);
+  wrapperDiv.appendChild(collapseWrapper);
+
+  return collapseDiv;
+};
+
+// Create export buttons and add to page
+const createExportButtons = (): void => {
+  // Find the action-bar container
+  const actionBar = document.querySelector(".action-bar");
+  if (!actionBar) {
+    devLog("Action bar container not found");
     return;
   }
 
-  // Update existing text
-  const exportDescription = collapsibleExport.querySelector(
-    "p.font-italic.small"
-  );
-  if (exportDescription) {
-    exportDescription.textContent =
-      "Click here to export your articles to a CSV document or copy them to clipboard.";
-  }
+  // Create Kenrick's Tools section
+  const kenricksToolsContent = createMKMHelperSection();
+  const kenricksToolsWrapper = kenricksToolsContent.closest(".align-items-center")!;
+
+  // Fallback: add at the end of action-bar with proper separator
+  const separatorHr = document.createElement("hr");
+  separatorHr.className = "my-3";
+  actionBar.appendChild(separatorHr);
+  actionBar.appendChild(kenricksToolsWrapper);
 
   // Add clipboard export button
   const clipboardButton = document.createElement("input");
@@ -274,16 +329,19 @@ const createExportButtons = (): void => {
   clipboardButton.id = "exportToText";
   clipboardButton.value = "Copy to Clipboard";
   clipboardButton.title = "Copy order contents as plain text to clipboard";
-  clipboardButton.className = "btn my-2 btn-block btn-sm btn-outline-primary";
+  clipboardButton.className = "btn my-2 btn-sm btn-outline-primary";
   clipboardButton.addEventListener("click", exportToText);
 
-  collapsibleExport.appendChild(clipboardButton);
+  const clipboardContainer = document.createElement("div");
+  clipboardContainer.className = "d-grid";
+  clipboardContainer.appendChild(clipboardButton);
+  kenricksToolsContent.appendChild(clipboardContainer);
 
   // Add custom tooltip span
   const tooltip = document.createElement("span");
   tooltip.id = "custom-tooltip";
   tooltip.textContent = "Copied!";
-  collapsibleExport.appendChild(tooltip);
+  kenricksToolsContent.appendChild(tooltip);
 
   // Add Moxfield CSV export button
   const moxfieldButton = document.createElement("input");
@@ -291,27 +349,21 @@ const createExportButtons = (): void => {
   moxfieldButton.id = "exportToMoxfield";
   moxfieldButton.value = "Export (Moxfield CSV)";
   moxfieldButton.title = "Export to Moxfield CSV format";
-  moxfieldButton.className = "btn my-2 btn-block btn-sm btn-outline-primary";
+  moxfieldButton.className = "btn my-2 btn-sm btn-outline-primary";
   moxfieldButton.addEventListener("click", exportMoxfieldCSV);
 
-  collapsibleExport.appendChild(moxfieldButton);
+  const moxfieldContainer = document.createElement("div");
+  moxfieldContainer.className = "d-grid";
+  moxfieldContainer.appendChild(moxfieldButton);
+  kenricksToolsContent.appendChild(moxfieldContainer);
 
-  // Also add to memo section if it exists
-  if (collapsibleMemo) {
-    const memoMoxfieldButton = moxfieldButton.cloneNode(
-      true
-    ) as HTMLInputElement;
-    memoMoxfieldButton.addEventListener("click", exportMoxfieldCSV);
-    collapsibleMemo.appendChild(memoMoxfieldButton);
-  }
-
-  devLog("Export buttons created and added to page 135");
+  devLog("Kenrick's Tools section created with export buttons");
 };
 
 // Initialize export functionality
 export const initializeExport = (pageType: CardMarketPageType): void => {
   try {
-    devLog("Initializing export functionality");
+    devLog("Initializing export functionality 1");
     createExportButtons();
     devLog("Export functionality initialization completed");
   } catch (error) {
