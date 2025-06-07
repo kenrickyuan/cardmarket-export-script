@@ -2,6 +2,7 @@
   "name": "mkm-helper-userscript",
   "version": "0.0.1",
   "description": "CardMarket helper userscript with TypeScript build system",
+  "type": "module",
   "main": "dist/script.js",
   "scripts": {
     "dev": "rollup -c build/rollup.config.dev.js --watch",
