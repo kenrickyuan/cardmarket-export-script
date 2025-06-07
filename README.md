@@ -51,6 +51,8 @@ A TypeScript userscript for CardMarket Magic: The Gathering that adds useful UI 
 - **Refresh CardMarket page** - See changes instantly
 - **Check console** for development logs and errors
 
+> **Cache Busting**: If you don't see changes after refresh, the browser may be caching the script. Add a version parameter to force reload: `http://localhost:3000/?v=123` (increment the number for each test)
+
 ### Build Commands
 
 | Command | Description |
