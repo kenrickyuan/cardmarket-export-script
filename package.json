@@ -1,0 +1,35 @@
+{
+  "name": "mkm-helper-userscript",
+  "version": "0.0.1",
+  "description": "CardMarket helper userscript with TypeScript build system",
+  "main": "dist/script.js",
+  "scripts": {
+    "dev": "rollup -c build/rollup.config.dev.js --watch",
+    "dev:file": "nodemon --watch src --ext ts --exec \"npm run build:dev && echo 'Script updated - refresh CardMarket page'\"",
+    "build": "rollup -c build/rollup.config.prod.js",
+    "build:dev": "rollup -c build/rollup.config.dev.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rm -rf dist dev-server",
+    "install:dev": "echo 'Install the development userscript from tampermonkey/mkm-helper-dev.user.js'",
+    "install:prod": "echo 'Install the production userscript from dist/mkm-helper.user.js'"
+  },
+  "keywords": ["tampermonkey", "userscript", "cardmarket", "typescript"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.5",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/tampermonkey": "^5.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "nodemon": "^3.0.3",
+    "rollup": "^4.9.6",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^1.1.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  }
+}
