@@ -17,7 +17,7 @@ console.log('🔥 MKM Helper (DEV) loaded');`,
   },
   plugins: [
     replace({
-      "process.env.NODE_ENV": JSON.stringify("development"),
+      "__DEV__": JSON.stringify(true),
       preventAssignment: true,
     }),
     resolve({

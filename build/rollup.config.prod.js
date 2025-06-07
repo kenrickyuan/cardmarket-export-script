@@ -17,7 +17,7 @@ export default {
   },
   plugins: [
     replace({
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      '__DEV__': JSON.stringify(false),
       preventAssignment: true
     }),
     resolve({
