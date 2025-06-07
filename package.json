@@ -12,10 +12,16 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint src/**/*.ts",
     "clean": "rm -rf dist dev-server",
+    "sync-sets": "npx tsx scripts/sync-scryfall-sets.ts",
     "install:dev": "echo 'Install the development userscript from tampermonkey/mkm-helper-dev.user.js'",
     "install:prod": "echo 'Install the production userscript from dist/mkm-helper.user.js'"
   },
-  "keywords": ["tampermonkey", "userscript", "cardmarket", "typescript"],
+  "keywords": [
+    "tampermonkey",
+    "userscript",
+    "cardmarket",
+    "typescript"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -31,6 +37,7 @@
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^1.1.1",
     "tslib": "^2.6.2",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
 }
